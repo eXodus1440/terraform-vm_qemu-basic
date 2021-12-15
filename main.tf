@@ -63,7 +63,8 @@ resource "proxmox_vm_qemu" "basic" {
     type        = "ssh"
     user        = "ubuntu"
     private_key = file("~/.ssh/steve_rsa")
-    host        = "172.16.0.41"
+    //host        = "172.16.0.41"
+    host        = var.ssh_host
   }
 
   provisioner "remote-exec" {

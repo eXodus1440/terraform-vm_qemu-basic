@@ -12,6 +12,7 @@ variable "vm_count" { default = "1" }
 variable "searchdomain" { default = "local" }
 variable "nameserver" { default = "8.8.8.8" }
 variable "ipconfig0" { default = "ip=192.168.0.101/24,gw=192.168.0.1" }
+variable "ssh_host" { default = "192.168.0.101" }
 
 // Cloud-init config
 variable "ciuser" { default = "ubuntu" }
