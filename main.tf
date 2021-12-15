@@ -16,25 +16,26 @@ provider "proxmox" {
 }
 
 resource "proxmox_vm_qemu" "basic" {
+  vmid = "${count.index + 1001}"
   count = var.vm_count
   name = "vm-basic-${count.index + 1001}"
   target_node = var.target_node
-  //target_node = "pve1"
-  vmid = "${count.index + 1001}"
-
   clone = "ubuntu-server-20.04-lts"
   full_clone = true
 
-  /*
-  agent    = 1
-  os_type  = "ubuntu"
-  cores    = 4
-  sockets  = "1"
-  cpu      = "host"
-  memory   = 8192
-  scsihw   = "virtio-scsi-pci"
-  bootdisk = "scsi0"
-  */
+  //agent    = 1
+  os_type    = "ubuntu"
+  sockets    = 1
+  cores      = 1
+  //cpu      = "host"
+  memory     = 2048
+  scsihw     = "virtio-scsi-pci"
+  boot       = "c"
+  bootdisk   = "scsi0"
+
+  vga {
+    type = "serial0"
+  }
 
   disk {
     size = "8G"
@@ -43,25 +44,32 @@ resource "proxmox_vm_qemu" "basic" {
   }
 
   network {
-    //id     = 0
     model  = "virtio"
     bridge = "vmbr0"
   }
 
-/*
-  lifecycle {
-    ignore_changes = [
-      network,
-    ]
+  // Cloud Init Settings
+  // https://registry.terraform.io/providers/Telmate/proxmox/latest/docs/guides/cloud_init
+  ciuser = var.ciuser
+  cipassword = var.cipassword
+  searchdomain = var.searchdomain
+  nameserver = var.nameserver
+  sshkeys = file("~/.ssh/steve_rsa.pub")
+  ipconfig0 = var.ipconfig0
+
+  // Provisioner connection settings 
+  // https://www.terraform.io/docs/language/resources/provisioners/connection.html
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("~/.ssh/steve_rsa")
+    host        = "172.16.0.41"
   }
 
-  # Cloud Init Settings
-  ipconfig0 = "ip=192.168.0.1${count.index + 1}/24,gw=<GW>"
-
-  sshkeys = <<EOF
-  ${var.ssh_key}
-  EOF
-*/
-
+  provisioner "remote-exec" {
+    inline = [
+      "ip a"
+    ]
+  }
 }
 
